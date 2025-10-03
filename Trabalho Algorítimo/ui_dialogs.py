@@ -92,11 +92,11 @@ class PessoaDialog:
 
         # --- Endereço ---
         ttk.Label(self.top, text="Estado:").grid(row=3, column=0, padx=5, pady=5)
-        self.cb_estado = ttk.Combobox(self.top, values=[e["nome"] for e in repo.listar_estados()], state="readonly")
+        self.cb_estado = ttk.Combobox(self.top, values=[e["nome"] for e in repo.listar_estados()])
         self.cb_estado.grid(row=3, column=1, sticky="w", padx=5, pady=5)
 
         ttk.Label(self.top, text="Cidade:").grid(row=4, column=0, padx=5, pady=5)
-        self.cb_cidade = ttk.Combobox(self.top, state="readonly")
+        self.cb_cidade = ttk.Combobox(self.top)
         self.cb_cidade.grid(row=4, column=1, sticky="w", padx=5, pady=5)
 
         def carregar_cidades(event=None):
@@ -169,21 +169,32 @@ class PessoaDialog:
             messagebox.showerror("Erro", "Nome é obrigatório!")
             return
 
+        # --- Estado ---
         id_estado = None
-        id_cidade = None
         if estado_nome:
             estado = next((e for e in repo.listar_estados() if e["nome"] == estado_nome), None)
             if estado:
                 id_estado = estado["id_estado"]
+            else:
+                messagebox.showerror("Erro", "Estado inválido!")
+                return
+
+        # --- Cidade ---
+        id_cidade = None
         if cidade_nome and id_estado:
             cidade = next((c for c in repo.listar_cidades(id_estado) if c["nome"] == cidade_nome), None)
             if cidade:
                 id_cidade = cidade["id_cidade"]
+            else:
+                # 🔹 Se a cidade não existir, cria no banco
+                id_cidade = repo.inserir_cidade(cidade_nome, id_estado)
 
+        # --- Endereço ---
         id_endereco = None
         if rua and id_cidade:
             id_endereco = repo.inserir_endereco(rua, numero, bairro, cep, id_cidade)
 
+        # --- Resultado final ---
         self.result = (nome, tel, email, id_endereco)
         self.top.destroy()
 
