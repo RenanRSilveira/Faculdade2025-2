@@ -435,28 +435,40 @@ class App:
 
         # Função para adicionar item na tree
         def add_item():
-            if not cb_produto.get() or not entry_qtd.get().isdigit():
+            valor_cb = cb_produto.get()
+            if not valor_cb or not entry_qtd.get().isdigit():
                 messagebox.showerror("Erro", "Selecione um produto e informe a quantidade.")
                 return
 
-            id_produto = int(cb_produto.get().split(" - ")[0])
-            nome_produto = cb_produto.get().split(" - ")[1]
+            # Extrai o ID do produto do combobox
+            id_produto = int(valor_cb.split(" - ")[0])
             qtd = int(entry_qtd.get())
 
-            # 🔎 Verifica o estoque disponível
-            produto = repo.buscar_produto_por_nome(nome_produto)
-            if produto and qtd > produto["quantidade"]:
+            # 🔎 Busca direto pelo ID (mais seguro que pelo nome)
+            produto = repo.buscar_produto_por_id(id_produto)
+            if not produto:
+                messagebox.showerror("Erro", f"O produto ID {id_produto} não foi encontrado.")
+                return
+
+            nome_produto = produto["nome"]
+            estoque_disponivel = produto["quantidade"]
+
+            # Valida quantidade
+            if qtd <= 0:
+                messagebox.showerror("Erro", "A quantidade deve ser maior que zero.")
+                return
+
+            if qtd > estoque_disponivel:
                 messagebox.showerror(
                     "Estoque insuficiente",
-                    f"O produto '{nome_produto}' tem apenas {produto['quantidade']} em estoque.\n"
+                    f"O produto '{nome_produto}' possui apenas {estoque_disponivel} em estoque.\n"
                     f"Você tentou adicionar {qtd}."
                 )
                 return
 
+            # Se passou na validação, insere na tree
             preco = repo.get_preco_produto(id_produto)
             subtotal = qtd * preco
-
-            # Insere na tree se estiver tudo certo
             tree_itens.insert(
                 "", "end",
                 values=(id_produto, nome_produto, qtd, f"{preco:.2f}", f"{subtotal:.2f}")

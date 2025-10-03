@@ -437,3 +437,5 @@ def buscar_fornecedor(fid):
         WHERE f.id_fornecedor=%s
     """, (fid,))
 
+def buscar_produto_por_id(id_produto):
+    return fetchone("SELECT * FROM produto WHERE id_produto = %s", (id_produto,))
