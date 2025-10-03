@@ -426,7 +426,7 @@ class App:
         # Seleção de produto
         tk.Label(dlg, text="Produto:").grid(row=2, column=0, padx=5, pady=5)
         produtos = repo.listar_produtos()
-        cb_produto = ttk.Combobox(dlg, values=[f"{p['id_produto']} - {p['nome']}" for p in produtos])
+        cb_produto = ttk.Combobox(dlg, values=[f"{p['id_produto']} - {p['nome']} ({p['quantidade']} em estoque)" for p in produtos], width=50)
         cb_produto.grid(row=2, column=1, padx=5, pady=5)
 
         tk.Label(dlg, text="Quantidade:").grid(row=2, column=2, padx=5, pady=5)
@@ -438,12 +438,29 @@ class App:
             if not cb_produto.get() or not entry_qtd.get().isdigit():
                 messagebox.showerror("Erro", "Selecione um produto e informe a quantidade.")
                 return
+
             id_produto = int(cb_produto.get().split(" - ")[0])
             nome_produto = cb_produto.get().split(" - ")[1]
             qtd = int(entry_qtd.get())
+
+            # 🔎 Verifica o estoque disponível
+            produto = repo.buscar_produto_por_nome(nome_produto)
+            if produto and qtd > produto["quantidade"]:
+                messagebox.showerror(
+                    "Estoque insuficiente",
+                    f"O produto '{nome_produto}' tem apenas {produto['quantidade']} em estoque.\n"
+                    f"Você tentou adicionar {qtd}."
+                )
+                return
+
             preco = repo.get_preco_produto(id_produto)
             subtotal = qtd * preco
-            tree_itens.insert("", "end", values=(id_produto, nome_produto, qtd, f"{preco:.2f}", f"{subtotal:.2f}"))
+
+            # Insere na tree se estiver tudo certo
+            tree_itens.insert(
+                "", "end",
+                values=(id_produto, nome_produto, qtd, f"{preco:.2f}", f"{subtotal:.2f}")
+            )
 
             # limpa campos
             entry_qtd.delete(0, tk.END)
@@ -458,7 +475,7 @@ class App:
 
             if not cb_cliente.get():
                 messagebox.showerror("Erro", "Selecione um cliente.")
-                btn_salvar.config(state="normal")  # reabilita se erro
+                btn_salvar.config(state="normal")
                 return
             id_cliente = int(cb_cliente.get().split(" - ")[0])
 
@@ -472,20 +489,25 @@ class App:
 
             if not itens:
                 messagebox.showerror("Erro", "Adicione ao menos um produto.")
-                btn_salvar.config(state="normal")  # reabilita se erro
+                btn_salvar.config(state="normal")
                 return
 
-            repo.inserir_venda(id_cliente, itens)
+            try:
+                repo.inserir_venda(id_cliente, itens)
 
-            # ✅ Mostra confirmação com resumo
-            resumo = "\n".join([f"Produto {idp} - Qtd {q} - R$ {p:.2f}" for idp, q, p in itens])
-            messagebox.showinfo("Sucesso", f"Venda registrada!\n\nCliente: {cb_cliente.get()}\nTotal: R$ {total:.2f}\n\nItens:\n{resumo}")
+                resumo = "\n".join([f"Produto {idp} - Qtd {q} - R$ {p:.2f}" for idp, q, p in itens])
+                messagebox.showinfo(
+                    "Sucesso",
+                    f"Venda registrada!\n\nCliente: {cb_cliente.get()}\nTotal: R$ {total:.2f}\n\nItens:\n{resumo}"
+                )
 
-            # Atualiza a listagem principal
-            self.load_vendas()
+                self.load_vendas()
+                dlg.destroy()
 
-            # Fecha a janela após salvar
-            dlg.destroy()
+            except ValueError as e:
+                # 🚨 Aqui cai quando não há estoque suficiente
+                messagebox.showerror("Erro de estoque", str(e))
+                btn_salvar.config(state="normal")  # reabilita botão para tentar de novo
 
         # Botão de salvar (precisa da referência para desabilitar no clique)
         btn_salvar = ttk.Button(dlg, text="Salvar Venda", command=salvar_venda)

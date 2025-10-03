@@ -5,7 +5,6 @@ Módulo repository
 -----------------
 CRUD e regras de negócio (interação com o banco).
 """
-
 from db import fetchall, execute, fetchone
 from datetime import datetime
 
@@ -25,43 +24,64 @@ def inserir_produto(nome, cat, preco, qtd, forn_id, estoque_min):
                    (nome,cat,preco,qtd,forn_id,estoque_min))
 
 
+import mysql.connector
+from db import DB_CONFIG
+
 def inserir_venda(id_cliente, itens):
     """
     Insere uma nova venda com múltiplos produtos e atualiza o estoque.
+    Usa transação e SELECT ... FOR UPDATE para evitar concorrência.
     """
-    total = sum(qtd * preco for _, qtd, preco in itens)
+    conn = mysql.connector.connect(**DB_CONFIG)
+    try:
+        conn.start_transaction()
+        cur = conn.cursor(dictionary=True)
 
-    # Cria a venda
-    venda_id = execute(
-        "INSERT INTO venda (id_cliente, valor_total, data_venda) VALUES (%s, %s, NOW())",
-        (id_cliente, total)
-    )
+        total = 0
+        # 🔒 Verifica estoque com bloqueio da linha
+        for id_produto, qtd, preco in itens:
+            cur.execute("SELECT quantidade, nome FROM produto WHERE id_produto = %s FOR UPDATE", (id_produto,))
+            row = cur.fetchone()
+            if not row:
+                raise ValueError(f"Produto {id_produto} não encontrado.")
+            if row["quantidade"] < qtd:
+                raise ValueError(
+                    f"Estoque insuficiente para '{row['nome']}'. "
+                    f"Disponível: {row['quantidade']}, solicitado: {qtd}."
+                )
+            total += qtd * preco
 
-    # Insere itens da venda e atualiza estoque
-    for id_produto, qtd, preco in itens:
-        subtotal = qtd * preco
-        execute(
-            "INSERT INTO produto_venda (id_venda, id_produto, quantidade, preco_unitario, subtotal) VALUES (%s, %s, %s, %s, %s)",
-            (venda_id, id_produto, qtd, preco, subtotal)
+        # Cria a venda
+        cur.execute(
+            "INSERT INTO venda (id_cliente, valor_total, data_venda) VALUES (%s, %s, NOW())",
+            (id_cliente, total)
         )
+        venda_id = cur.lastrowid
 
-        # Atualiza o estoque
-        execute(
-            "UPDATE produto SET quantidade = quantidade - %s WHERE id_produto = %s",
-            (qtd, id_produto)
-        )
+        # Insere itens e atualiza estoque
+        for id_produto, qtd, preco in itens:
+            subtotal = qtd * preco
+            cur.execute(
+                """INSERT INTO produto_venda (id_venda, id_produto, quantidade, preco_unitario, subtotal)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (venda_id, id_produto, qtd, preco, subtotal)
+            )
+            cur.execute(
+                "UPDATE produto SET quantidade = quantidade - %s WHERE id_produto = %s",
+                (qtd, id_produto)
+            )
 
+        conn.commit()
+        return venda_id
 
-    return venda_id
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cur.close()
+        conn.close()
 
-
-
-
-
-
-
-
-    
+   
 def atualizar_quantidade_produto(id_produto, qtd_extra):
     """
     Incrementa a quantidade de um produto já existente no estoque.
