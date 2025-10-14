@@ -4,11 +4,20 @@ Responsável pela conexão com o banco de dados MySQL e execução de consultas.
 
 import mysql.connector
 
+#Carregando as variáveis de ambiente com as credenciais do banco
+
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+
+# Carrega as variáveis do arquivo ./.env e coloca dentro do ambiente do Python
+load_dotenv()
+
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    #'password': 'sua_senha',
-    'database': 'distribuidora',
+    'host': os.getenv("HOST"),
+    'user': os.getenv("USER"),
+    'password': os.getenv("PASSWORD"),
+    'database': os.getenv("DATABASE"),
     'raise_on_warnings': True
 }
 
