@@ -104,12 +104,39 @@ delete from estado where id_estado >1;
 select * from estado;
 select * from cidade;
 insert into cidade (nome, id_estado) values 
-("Ipatinga", 1);
+("Ipatinga", 13);
 
 select * from cliente;
 select * from endereco;
 select * from venda;
 
+INSERT INTO estado (nome, sigla) VALUES
+('Acre', 'AC'),
+('Alagoas', 'AL'),
+('Amapá', 'AP'),
+('Amazonas', 'AM'),
+('Bahia', 'BA'),
+('Ceará', 'CE'),
+('Distrito Federal', 'DF'),
+('Espírito Santo', 'ES'),
+('Goiás', 'GO'),
+('Maranhão', 'MA'),
+('Mato Grosso', 'MT'),
+('Mato Grosso do Sul', 'MS'),
+('Minas Gerais', 'MG'),
+('Pará', 'PA'),
+('Paraíba', 'PB'),
+('Paraná', 'PR'),
+('Pernambuco', 'PE'),
+('Piauí', 'PI'),
+('Rio de Janeiro', 'RJ'),
+('Rio Grande do Norte', 'RN'),
+('Rio Grande do Sul', 'RS'),
+('Rondônia', 'RO'),
+('Roraima', 'RR'),
+('Santa Catarina', 'SC'),
+('São Paulo', 'SP'),
+('Sergipe', 'SE'),
+('Tocantins', 'TO');
 
-
-
+select * from entrada_produto;
