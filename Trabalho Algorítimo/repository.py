@@ -254,6 +254,15 @@ def atualizar_produto(id_produto, nome=None, preco=None):
     
     return execute(query, params)
 
+def atualizar_produto(id_prod, nome, cat, preco, qtd, forn, est_min):
+    """
+    Atualiza as informações de um produto.
+    """
+    query = "UPDATE produto SET nome = %s, categoria=%s, preco = %s, quantidade = %s, id_fornecedor = %s, estoque_minimo = %s WHERE id_produto = %s"
+    params = (nome, cat, preco, qtd, forn, est_min, id_prod)
+    
+    return execute(query, params)
+
 def atualizar_cliente(id_cliente, nome=None, telefone=None, email=None, id_endereco=None):
     """
     Atualiza os dados de um cliente (nome, telefone, email, endereço).

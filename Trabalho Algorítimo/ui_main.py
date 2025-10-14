@@ -7,7 +7,7 @@ Interface principal (Tkinter + abas).
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import repository as repo
-from ui_dialogs import ProdutoDialog, PessoaDialog
+from ui_dialogs import ProdutoDialog, PessoaDialog, ProdutoEditDialog
 from tkcalendar import DateEntry
 
 
@@ -708,47 +708,98 @@ class App:
                 self.txt_rel.insert("end", f"{r['id_produto']} - {r['nome']} | Qtd {r['quantidade']} | Min {r['estoque_minimo']}\n")
         self.txt_rel.config(state="disabled")  # trava novamente
 
+    # def edit_produto(self):
+    #     """Edita nome e/ou preço do produto selecionado."""
+    #     sel = self.tree_prod.selection()
+    #     if not sel:
+    #         messagebox.showwarning("Aviso", "Selecione um produto para editar.")
+    #         return
+
+    #     item = self.tree_prod.item(sel[0])
+    #     id_produto, nome_atual, categoria, preco_atual, qtd, forn, est_min = item["values"]
+
+    #     # Pergunta novos valores
+    #     novo_nome = simpledialog.askstring(
+    #         "Editar Produto",
+    #         f"Nome atual: {nome_atual}\nDigite o novo nome (ou deixe em branco):",
+    #     parent=self.root  # ✅ mantém a janela principal em foco
+    #     )
+    #     self.root.focus_force()
+
+        
+    #     novo_preco_str = simpledialog.askstring(
+    #         "Editar Produto",
+    #         f"Preço atual: {preco_atual}\nDigite o novo preço (ou deixe em branco):",
+    #     parent=self.root  # ✅ mantém a janela principal em foco
+    #     )
+    #     self.root.focus_force()
+
+    #     # Se usuário deixou em branco → mantém os valores atuais
+    #     if not novo_nome:
+    #         novo_nome = nome_atual
+
+    #     if not novo_preco_str:
+    #         novo_preco = preco_atual
+    #     else:
+    #         try:
+    #             novo_preco = float(novo_preco_str)
+    #         except ValueError:
+    #             messagebox.showerror("Erro", "Preço inválido.")
+    #             return
+
+    #     # Atualiza no banco
+    #     repo.atualizar_produto(id_produto, nome=novo_nome, preco=novo_preco)
+
+    #     messagebox.showinfo("Sucesso", f"Produto {id_produto} atualizado.")
+    #     self.load_produtos()
     def edit_produto(self):
-        """Edita nome e/ou preço do produto selecionado."""
+        """Edita o produto selecionado."""
         sel = self.tree_prod.selection()
         if not sel:
             messagebox.showwarning("Aviso", "Selecione um produto para editar.")
             return
 
         item = self.tree_prod.item(sel[0])
-        id_produto, nome_atual, categoria, preco_atual, qtd, forn, est_min = item["values"]
+        id_produto, nome_atual, categoria, preco_atual, qtd, id_forn, est_min = item["values"]
 
-        # Pergunta novos valores
-        novo_nome = simpledialog.askstring(
-            "Editar Produto",
-            f"Nome atual: {nome_atual}\nDigite o novo nome (ou deixe em branco):",
-        parent=self.root  # ✅ mantém a janela principal em foco
-        )
-        self.root.focus_force()
+        dlg = ProdutoEditDialog(self.root, nome_atual, categoria, preco_atual, qtd, id_forn, est_min)
+        self.root.wait_window(dlg.top)
+
+        if dlg.result:
+            nome, cat, preco, qtd, forn, est_min = dlg.result
+            repo.atualizar_produto(id_produto, nome, cat, preco, qtd, forn, est_min)
+
+        # # Pergunta novos valores
+        # novo_nome = simpledialog.askstring(
+        #     "Editar Produto",
+        #     f"Nome atual: {nome_atual}\nDigite o novo nome (ou deixe em branco):",
+        # parent=self.root  # ✅ mantém a janela principal em foco
+        # )
+        # self.root.focus_force()
 
         
-        novo_preco_str = simpledialog.askstring(
-            "Editar Produto",
-            f"Preço atual: {preco_atual}\nDigite o novo preço (ou deixe em branco):",
-        parent=self.root  # ✅ mantém a janela principal em foco
-        )
-        self.root.focus_force()
+        # novo_preco_str = simpledialog.askstring(
+        #     "Editar Produto",
+        #     f"Preço atual: {preco_atual}\nDigite o novo preço (ou deixe em branco):",
+        # parent=self.root  # ✅ mantém a janela principal em foco
+        # )
+        # self.root.focus_force()
 
         # Se usuário deixou em branco → mantém os valores atuais
-        if not novo_nome:
-            novo_nome = nome_atual
+        # if not novo_nome:
+        #     novo_nome = nome_atual
 
-        if not novo_preco_str:
-            novo_preco = preco_atual
-        else:
-            try:
-                novo_preco = float(novo_preco_str)
-            except ValueError:
-                messagebox.showerror("Erro", "Preço inválido.")
-                return
+        # if not novo_preco_str:
+        #     novo_preco = preco_atual
+        # else:
+        #     try:
+        #         novo_preco = float(novo_preco_str)
+        #     except ValueError:
+        #         messagebox.showerror("Erro", "Preço inválido.")
+        #         return
 
-        # Atualiza no banco
-        repo.atualizar_produto(id_produto, nome=novo_nome, preco=novo_preco)
+        # # Atualiza no banco
+        # repo.atualizar_produto(id_produto, nome=novo_nome, preco=novo_preco)
 
         messagebox.showinfo("Sucesso", f"Produto {id_produto} atualizado.")
         self.load_produtos()

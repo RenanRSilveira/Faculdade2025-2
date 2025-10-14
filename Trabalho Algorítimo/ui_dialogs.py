@@ -64,6 +64,73 @@ class ProdutoDialog:
             from tkinter import messagebox
             messagebox.showerror("Erro", f"Preencha corretamente os campos!\n{e}")
 
+class ProdutoEditDialog:
+    def __init__(self, parent, nome, cat, preco, qtd, id_forn, est_min):
+        top = self.top = tk.Toplevel(parent)
+        top.title("Editar Produto")
+
+        tk.Label(top, text="Nome:").grid(row=0, column=0, padx=5, pady=5)
+        self.entry_nome = tk.Entry(top)
+        self.entry_nome.insert(0, nome)
+        self.entry_nome.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Label(top, text="Categoria:").grid(row=1, column=0, padx=5, pady=5)
+        self.entry_cat = tk.Entry(top)
+        self.entry_cat.insert(0, cat)
+        self.entry_cat.grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Label(top, text="Preço:").grid(row=2, column=0, padx=5, pady=5)
+        self.entry_preco = tk.Entry(top)
+        self.entry_preco.insert(0, preco)
+        self.entry_preco.grid(row=2, column=1, padx=5, pady=5)
+
+        tk.Label(top, text="Quantidade:").grid(row=3, column=0, padx=5, pady=5)
+        self.entry_qtd = tk.Entry(top)
+        self.entry_qtd.insert(0, qtd)
+        self.entry_qtd.grid(row=3, column=1, padx=5, pady=5)
+
+        # 🔹 Combobox com fornecedores
+        tk.Label(top, text="Fornecedor:").grid(row=4, column=0, padx=5, pady=5)
+        fornecedores = repo.listar_fornecedores()
+        valores_cb_forn = [f"{f['id_fornecedor']} - {f['nome']}" for f in fornecedores]
+        self.cb_forn = ttk.Combobox(top, values=valores_cb_forn)
+        self.cb_forn.grid(row=4, column=1, padx=5, pady=5)
+
+        for item in valores_cb_forn:
+            if item.startswith(f"{id_forn} -"):
+                self.cb_forn.set(item)
+                break
+
+        tk.Label(top, text="Estoque mínimo:").grid(row=5, column=0, padx=5, pady=5)
+        self.entry_est_min = tk.Entry(top)
+        self.entry_est_min.insert(0, est_min)
+        self.entry_est_min.grid(row=5, column=1, padx=5, pady=5)
+
+        ttk.Button(top, text="OK", command=self.ok).grid(row=6, column=0, columnspan=2, pady=10)
+
+        self.result = None
+
+    def ok(self):
+        try:
+            nome = self.entry_nome.get()
+            cat = self.entry_cat.get()
+            preco = float(self.entry_preco.get())
+            qtd = int(self.entry_qtd.get())
+
+            # 🔹 Extrai só o id do fornecedor
+            forn = self.cb_forn.get()
+            if forn:
+                id_forn = int(forn.split(" - ")[0])
+            else:
+                raise Exception("Preencha o fornecedor!")
+
+            est_min = int(self.entry_est_min.get())
+            self.result = (nome, cat, preco, qtd, id_forn, est_min)
+            self.top.destroy()
+        except Exception as e:
+            from tkinter import messagebox
+            messagebox.showerror("Erro", f"Preencha corretamente os campos!\n{e}")
+
 
 class PessoaDialog:
     def __init__(self, parent, title="Nova Pessoa", pessoa=None):
