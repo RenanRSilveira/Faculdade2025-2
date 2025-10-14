@@ -4,7 +4,7 @@ Criando um arquivo desktop para gerenciar uma distribuidora, desenvolvido em dup
 ## Para utilizar as credenciais do banco como variáveis de ambiente
 1 - Crie um arquivo .env no diretório dos arquivos .py do projeto
 2 - Preencha dessa forma:
-<pre> python HOST=link_do_banco(localhost)
+<pre>HOST=link_do_banco(localhost)
 USER=usuario
 PASSWORD=senha
 DATABASE=nome_do_banco 
