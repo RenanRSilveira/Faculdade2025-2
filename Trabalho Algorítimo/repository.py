@@ -212,18 +212,32 @@ def atualizar_cliente(id_cliente, nome, telefone, email, id_endereco):
     
     return execute(query, params)
 
-def buscar_cliente(cid):
+def buscar_cliente(id_cliente):
     return fetchone("""
         SELECT c.id_cliente AS id, c.nome, c.telefone, c.email,
                e.rua, e.numero, e.bairro, e.cep,
                ci.id_cidade, ci.nome AS cidade,
-               es.id_estado, es.sigla AS estado
+               es.id_estado, es.nome AS estado,
+               c.id_endereco
         FROM cliente c
         LEFT JOIN endereco e ON c.id_endereco = e.id_endereco
         LEFT JOIN cidade ci ON e.id_cidade = ci.id_cidade
         LEFT JOIN estado es ON ci.id_estado = es.id_estado
         WHERE c.id_cliente=%s
-    """, (cid,))
+    """, (id_cliente,))
+
+# def buscar_cliente(cid):
+#     return fetchone("""
+#         SELECT c.id_cliente AS id, c.nome, c.telefone, c.email,
+#                e.rua, e.numero, e.bairro, e.cep,
+#                ci.id_cidade, ci.nome AS cidade,
+#                es.id_estado, es.sigla AS estado
+#         FROM cliente c
+#         LEFT JOIN endereco e ON c.id_endereco = e.id_endereco
+#         LEFT JOIN cidade ci ON e.id_cidade = ci.id_cidade
+#         LEFT JOIN estado es ON ci.id_estado = es.id_estado
+#         WHERE c.id_cliente=%s
+#     """, (cid,))
 #endregion
 
 # region Fornecedor
@@ -252,7 +266,8 @@ def buscar_fornecedor(id_fornecedor):
         SELECT f.id_fornecedor AS id, f.nome, f.telefone, f.email,
                e.rua, e.numero, e.bairro, e.cep,
                ci.id_cidade, ci.nome AS cidade,
-               es.id_estado, es.sigla AS estado
+               es.id_estado, es.nome AS estado,
+               f.id_endereco
         FROM fornecedor f
         LEFT JOIN endereco e ON f.id_endereco = e.id_endereco
         LEFT JOIN cidade ci ON e.id_cidade = ci.id_cidade

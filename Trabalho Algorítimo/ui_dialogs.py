@@ -167,7 +167,7 @@ class PessoaDialog:
         self.cb_cidade = ttk.Combobox(self.top)
         self.cb_cidade.grid(row=4, column=1, sticky="w", padx=5, pady=5)
 
-        def carregar_cidades():
+        def carregar_cidades(event=None):
             estado_nome = self.cb_estado.get()
             if estado_nome:
                 estado = next((e for e in repo.listar_estados() if e["nome"] == estado_nome), None)
@@ -209,20 +209,16 @@ class PessoaDialog:
             self.e_tel.insert(0, pessoa["telefone"])
             self.e_email.insert(0, pessoa["email"])
             self.id_endereco = pessoa["id_endereco"]
+            self.cb_estado.set(pessoa["estado"])
+            carregar_cidades()
+            self.cb_cidade.set(pessoa["cidade"])
+            self.e_rua.insert(0, pessoa["rua"])
+            self.e_numero.insert(0, pessoa["numero"])
+            self.e_bairro.insert(0, pessoa["bairro"])
+            self.e_cep.insert(0, pessoa["cep"])
 
-            if pessoa.get("estado"):
-                self.cb_estado.set(pessoa["estado"])
-                carregar_cidades()
-            if pessoa.get("cidade"):
-                self.cb_cidade.set(pessoa["cidade"])
-            if pessoa.get("rua"):
-                self.e_rua.insert(0, pessoa["rua"])
-            if pessoa.get("numero"):
-                self.e_numero.insert(0, pessoa["numero"])
-            if pessoa.get("bairro"):
-                self.e_bairro.insert(0, pessoa["bairro"])
-            if pessoa.get("cep"):
-                self.e_cep.insert(0, pessoa["cep"])
+            print(pessoa["estado"])
+            print(pessoa["rua"])
 
     def on_save(self):
         try:
@@ -269,7 +265,7 @@ class PessoaDialog:
                 raise ValueError("Selecione um estado!")
             else:
                 #Seleciona o id_estado a partir do nome
-                id_estado = next((e["id_estado"] for e in self.valores_cb_estado if e["nome"] == estado_nome), None)
+                id_estado = next((e["id"] for e in self.valores_cb_estado if e["nome"] == estado_nome), None)
                 #Validação de cidade
                 cidade_nome = self.cb_cidade.get().strip()
                 if not cidade_nome:
