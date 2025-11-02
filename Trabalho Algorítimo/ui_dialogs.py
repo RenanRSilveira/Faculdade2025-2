@@ -182,7 +182,7 @@ class PessoaDialog:
 
         self.cb_estado.bind("<<ComboboxSelected>>", carregar_cidades)
 
-        ttk.Label(self.top, text="Rua:").grid(row=5, column=0, padx=5, pady=5)
+        ttk.Label(self.top, text="Logradouro:").grid(row=5, column=0, padx=5, pady=5)
         self.e_rua = ttk.Entry(self.top, width=30)
         self.e_rua.grid(row=5, column=1, sticky="w", padx=5, pady=5)
 
@@ -216,9 +216,6 @@ class PessoaDialog:
             self.e_numero.insert(0, pessoa["numero"])
             self.e_bairro.insert(0, pessoa["bairro"])
             self.e_cep.insert(0, pessoa["cep"])
-
-            print(pessoa["estado"])
-            print(pessoa["rua"])
 
     def on_save(self):
         try:

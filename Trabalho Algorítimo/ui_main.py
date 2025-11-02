@@ -48,9 +48,9 @@ class App:
         frame_botoes.pack(fill="x", pady=5)
 
         ttk.Button(frame_botoes, text="Adicionar", takefocus=False, command=self.add_produto).pack(side="left", padx=5)
-        ttk.Button(frame_botoes, text="Atualizar", takefocus=False, command=self.load_produtos).pack(side="left", padx=5)
-        ttk.Button(frame_botoes, text="Deletar", takefocus=False, command=self.del_produto).pack(side="left", padx=5)
         ttk.Button(frame_botoes, text="Editar", takefocus=False, command=self.edit_produto).pack(side="left", padx=5)
+        ttk.Button(frame_botoes, text="Excluir", takefocus=False, command=self.del_produto).pack(side="left", padx=5)
+        ttk.Button(frame_botoes, text="Atualizar", takefocus=False, command=self.load_produtos).pack(side="left", padx=5)
 
 
         # Treeview
@@ -292,7 +292,7 @@ class App:
 
         ttk.Button(frame_botoes, text="Adicionar", takefocus=False, command=self.add_venda).pack(side="left", padx=5)
         ttk.Button(frame_botoes, text="Atualizar", takefocus=False, command=self.load_vendas).pack(side="left", padx=5)
-        ttk.Button(frame_botoes, text="Deletar", takefocus=False, command=self.del_venda).pack(side="left", padx=5)
+        ttk.Button(frame_botoes, text="Excluir", takefocus=False, command=self.del_venda).pack(side="left", padx=5)
 
 
         # Treeview principal (vendas)
@@ -510,7 +510,7 @@ class App:
                     f"Total: R$ {r['valor_total']:.2f} | Data: {r['data_venda']}\n"
                 )
                 total += r["valor_total"]
-            self.txt_rel.insert("end", f"Total gasto no período: R$ {total:.2f}\n")
+            self.txt_rel.insert("end", f"Total faturado no período: R$ {total:.2f}\n")
             
         self.txt_rel.config(state="disabled")
 
